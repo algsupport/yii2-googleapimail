@@ -1,139 +1,51 @@
 <?php
 /**
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
+ * @link http://www.algsupport.com/
+ * @copyright Copyright (c) 2021 ALGSUPPORT OÜ
  */
 
-namespace yii\swiftmailer;
+
+namespace algsupport\googleapimail;
 
 use Yii;
-use yii\base\InvalidConfigException;
+use ReflectionObject;
 use yii\mail\BaseMailer;
+use Google\Service\Gmail;
+use yii\base\InvalidConfigException;
 
-/**
- * Mailer implements a mailer based on SwiftMailer.
- *
- * To use Mailer, you should configure it in the application configuration like the following:
- *
- * ```php
- * [
- *     'components' => [
- *         'mailer' => [
- *             'class' => 'yii\swiftmailer\Mailer',
- *             'transport' => [
- *                 'class' => 'Swift_SmtpTransport',
- *                 'host' => 'localhost',
- *                 'username' => 'username',
- *                 'password' => 'password',
- *                 'port' => '587',
- *                 'encryption' => 'tls',
- *             ],
- *         ],
- *         // ...
- *     ],
- *     // ...
- * ],
- * ```
- *
- * You may also skip the configuration of the [[transport]] property. In that case, the default
- * `\Swift_SendmailTransport` transport will be used to send emails.
- *
- * You specify the transport constructor arguments using 'constructArgs' key in the config.
- * You can also specify the list of plugins, which should be registered to the transport using
- * 'plugins' key. For example:
- *
- * ```php
- * 'transport' => [
- *     'class' => 'Swift_SmtpTransport',
- *     'constructArgs' => ['localhost', 25],
- *     'plugins' => [
- *         [
- *             'class' => 'Swift_Plugins_ThrottlerPlugin',
- *             'constructArgs' => [20],
- *         ],
- *     ],
- * ],
- * ```
- *
- * To send an email, you may use the following code:
- *
- * ```php
- * Yii::$app->mailer->compose('contact/html', ['contactForm' => $form])
- *     ->setFrom('from@domain.com')
- *     ->setTo($form->email)
- *     ->setSubject($form->subject)
- *     ->send();
- * ```
- *
- * @see http://swiftmailer.org
- *
- * @property array|\Swift_Mailer $swiftMailer Swift mailer instance or array configuration. This property is
- * read-only.
- * @property array|\Swift_Transport $transport This property is read-only.
- *
- * @author Paul Klimov <klimov.paul@gmail.com>
- * @since 2.0
- */
+
 class Mailer extends BaseMailer
 {
-    /**
-     * @var string message default class name.
-     */
-    public $messageClass = 'yii\swiftmailer\Message';
-    /**
-     * @var bool whether to enable writing of the SwiftMailer internal logs using Yii log mechanism.
-     * If enabled [[Logger]] plugin will be attached to the [[transport]] for this purpose.
-     * @see Logger
-     * @since 2.0.4
-     */
-    public $enableSwiftMailerLogging = false;
+    private Gmail $_gmailMailer;
 
-    /**
-     * @var \Swift_Mailer Swift mailer instance.
-     */
-    private $_swiftMailer;
-    /**
-     * @var \Swift_Transport|array Swift transport instance or its array configuration.
-     */
-    private $_transport = [];
+    private array $_transport = [];
 
 
-    /**
-     * @return \Swift_Mailer Swift mailer instance.
-     */
-    public function getSwiftMailer()
+	/**
+	 * @throws InvalidConfigException
+	 */
+	public function getGmailMailer(): Gmail
     {
-        if (!is_object($this->_swiftMailer)) {
-            $this->_swiftMailer = $this->createSwiftMailer();
+        if (!is_object($this->_gmailMailer)) {
+            $this->_gmailMailer = $this->createGmailMailer();
         }
 
-        if (!$this->_transport->ping()) {
-            $this->_transport->stop();
-            $this->_transport->start();
-        }
-
-        return $this->_swiftMailer;
+        return $this->_gmailMailer;
     }
 
-    /**
-     * @param array|\Swift_Transport $transport
-     * @throws InvalidConfigException on invalid argument.
-     */
-    public function setTransport($transport)
+	/**
+	 * @throws InvalidConfigException
+	 */
+	protected function createGmailMailer(): Gmail
     {
-        if (!is_array($transport) && !is_object($transport)) {
-            throw new InvalidConfigException('"' . get_class($this) . '::transport" should be either object or array, "' . gettype($transport) . '" given.');
-        }
-        $this->_transport = $transport;
-        $this->_swiftMailer = null;
+        return new Gmail($this->getTransport());
     }
 
-    /**
-     * @return \Swift_Transport
-     */
-    public function getTransport()
-    {
+	/**
+	 * @throws InvalidConfigException
+	 */
+	public function getTransport(): array
+	{
         if (!is_object($this->_transport)) {
             $this->_transport = $this->createTransport($this->_transport);
         }
@@ -141,80 +53,21 @@ class Mailer extends BaseMailer
         return $this->_transport;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function sendMessage($message)
-    {
-        /* @var $message Message */
-        $address = $message->getTo();
-        if (is_array($address)) {
-            $address = implode(', ', array_keys($address));
-        }
-        Yii::info('Sending email "' . $message->getSubject() . '" to "' . $address . '"', __METHOD__);
-
-        return $this->getSwiftMailer()->send($message->getSwiftMessage()) > 0;
-    }
-
-    /**
-     * Creates Swift mailer instance.
-     * @return \Swift_Mailer mailer instance.
-     */
-    protected function createSwiftMailer()
-    {
-        return new \Swift_Mailer($this->getTransport());
-    }
-
-    /**
-     * Creates email transport instance by its array configuration.
-     * @param array $config transport configuration.
-     * @throws \yii\base\InvalidConfigException on invalid transport configuration.
-     * @return \Swift_Transport transport instance.
-     */
-    protected function createTransport(array $config)
+	/**
+	 * @throws InvalidConfigException
+	 */
+	protected function createTransport(array $config)
     {
         if (!isset($config['class'])) {
-            $config['class'] = 'Swift_SendmailTransport';
+            $config['class'] = GmailApiTransport::class;
         }
-        if (isset($config['plugins'])) {
-            $plugins = $config['plugins'];
-            unset($config['plugins']);
-        } else {
-            $plugins = [];
-        }
-
-        if ($this->enableSwiftMailerLogging) {
-            $plugins[] = [
-                'class' => 'Swift_Plugins_LoggerPlugin',
-                'constructArgs' => [
-                    [
-                        'class' => 'yii\swiftmailer\Logger'
-                    ]
-                ],
-            ];
-        }
-
-        /* @var $transport \Swift_Transport */
-        $transport = $this->createSwiftObject($config);
-        if (!empty($plugins)) {
-            foreach ($plugins as $plugin) {
-                if (is_array($plugin) && isset($plugin['class'])) {
-                    $plugin = $this->createSwiftObject($plugin);
-                }
-                $transport->registerPlugin($plugin);
-            }
-        }
-
-        return $transport;
+	    return $this->createGmailObject($config)->client;
     }
 
-    /**
-     * Creates Swift library object, from given array configuration.
-     * @param array $config object configuration
-     * @return Object created object
-     * @throws \yii\base\InvalidConfigException on invalid configuration.
-     */
-    protected function createSwiftObject(array $config)
+	/**
+	 * @throws InvalidConfigException
+	 */
+	protected function createGmailObject(array $config)
     {
         if (isset($config['class'])) {
             $className = $config['class'];
@@ -223,23 +76,10 @@ class Mailer extends BaseMailer
             throw new InvalidConfigException('Object configuration must be an array containing a "class" element.');
         }
 
-        if (isset($config['constructArgs'])) {
-            $args = [];
-            foreach ($config['constructArgs'] as $arg) {
-                if (is_array($arg) && isset($arg['class'])) {
-                    $args[] = $this->createSwiftObject($arg);
-                } else {
-                    $args[] = $arg;
-                }
-            }
-            unset($config['constructArgs']);
-            $object = Yii::createObject($className, $args);
-        } else {
-            $object = Yii::createObject($className);
-        }
+		$object = Yii::createObject($className);
 
         if (!empty($config)) {
-            $reflection = new \ReflectionObject($object);
+            $reflection = new ReflectionObject($object);
             foreach ($config as $name => $value) {
                 if ($reflection->hasProperty($name) && $reflection->getProperty($name)->isPublic()) {
                     $object->$name = $value;
@@ -256,4 +96,26 @@ class Mailer extends BaseMailer
 
         return $object;
     }
+
+
+	/**
+	 * @throws InvalidConfigException
+	 */
+	protected function sendMessage($message): bool
+    {
+        $address = $message->getTo();
+
+		$this->getGmailMailer()->getClient()->setSubject($message->getFrom());
+
+        if (is_array($address)) {
+            $address = implode(', ', array_keys($address));
+        }
+        Yii::info('Sending email "' . $message->getSubject() . '" to "' . $address . '"', __METHOD__);
+
+		$googleMessage = new \Google\Service\Gmail\Message();
+		$googleMessage->setRaw(strtr(base64_encode($message->toString()), array('+' => '-', '/' => '_')));
+
+        return $this->getGmailMailer()->users_messages->send('me', $googleMessage) > 0;
+    }
+
 }

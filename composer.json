@@ -1,30 +1,36 @@
 {
-    "name": "algsupport/yii2-googleapimail",
-    "description": "Goolgle API service account mailer based on the yii2-swiftmailer extension to use the same intarface",
-    "keywords": ["yii2", "Goolgle", "API", "gmail", "mail", "email", "mailer"],
-    "type": "yii2-extension",
-    "license": "BSD-3-Clause",
-    "support": {
-        "issues": "https://github.com/algsupport/yii2-googleapimail/issues",
-        "source": "https://github.com/algsupport/yii2-googleapimail"
-    },
-    "authors": [
+	"name": "algsupport/yii2-googleapimail",
+	"description": "Google API service account mailer based on the yii2-swiftmailer extension to use the same interface",
+	"keywords": ["yii2", "Goolgle", "API", "gmail", "mail", "email", "mailer"],
+	"type": "yii2-extension",
+	"license": "BSD-3-Clause",
+	"support": {
+		"issues": "https://github.com/algsupport/yii2-googleapimail/issues",
+		"source": "https://github.com/algsupport/yii2-googleapimail"
+	},
+	"authors": [
+		{
+			"name": "Albert Gukasian",
+			"email": "admin@algsupport.com"
+		}
+	],
+	"require": {
+		"yiisoft/yii2": "*",
+		"phpmailer/phpmailer": "*",
+		"google/apiclient": "*"
+	},
+	"repositories": [
         {
-            "name": "Albert Gukasian",
-            "email": "admin@algsupport.com"
+            "type": "composer",
+            "url": "https://asset-packagist.org"
         }
     ],
-    "require": {
-        "yiisoft/yii2": ">=2.0.4",
-        "phpmailer/phpmailer": "*",
-        "google/apiclient": "*"
-    },
-    "scripts": {
-        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
-    },
-    "extra": {
-        "google/apiclient-services": [
-            "Gmail"
-        ]
-    }
+	"scripts": {
+		"pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+	},
+	"extra": {
+		"google/apiclient-services": [
+			"Gmail"
+		]
+	}
 }
