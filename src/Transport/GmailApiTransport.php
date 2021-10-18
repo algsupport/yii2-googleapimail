@@ -8,7 +8,7 @@
 
 	class GmailApiTransport
 	{
-		private string $google_api_credentials = "";
+		private string $_google_api_credentials = "";
 
 		public Client $client;
 
@@ -19,11 +19,16 @@
 	    {
 			if (!empty($credentials))
 			{
-				$this->google_api_credentials = $credentials;
+				$this->setGoogleApiCredentials($credentials);
 			}
 
 			$this->client = new Client();
-			$this->client->setAuthConfig($this->google_api_credentials);
+			$this->client->setAuthConfig($this->_google_api_credentials);
 			$this->client->addScope(Gmail::MAIL_GOOGLE_COM);
 	    }
+
+		public function setGoogleApiCredentials($credentials)
+        {
+            $this->_google_api_credentials = $credentials;
+        }
 	}
