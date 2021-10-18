@@ -4,31 +4,37 @@
 
 	use google\Client;
 	use Google\Exception;
+	use yii\base\BaseObject;
 	use Google\Service\Gmail;
 
-	class GmailApiTransport
+	class GmailApiTransport extends BaseObject
 	{
-		private string $_google_api_credentials = "";
+		private string $_credentials = "";
 
 		public Client $client;
+
+		public function __construct($credentials, $config = [])
+	    {
+			if (!empty($credentials))
+			{
+				$this->setCredentials($credentials);
+			}
+			 parent::__construct($config);
+	    }
+
+		public function setCredentials($credentials)
+        {
+			$this->_credentials = $credentials;
+        }
 
 		/**
 		 * @throws Exception
 		 */
-		public function __construct($credentials)
-	    {
-			if (!empty($credentials))
-			{
-				$this->setGoogleApiCredentials($credentials);
-			}
-
+		public function init()
+		{
 			$this->client = new Client();
-			$this->client->setAuthConfig($this->_google_api_credentials);
+			$this->client->setAuthConfig($this->_credentials);
 			$this->client->addScope(Gmail::MAIL_GOOGLE_COM);
-	    }
-
-		public function setGoogleApiCredentials($credentials)
-        {
-            $this->_google_api_credentials = $credentials;
-        }
+			parent::init();
+		}
 	}
