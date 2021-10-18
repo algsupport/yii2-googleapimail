@@ -24,7 +24,7 @@ class Message extends BaseMessage
 
     public function getGmailMessage(): PHPMailer
     {
-        if (!is_object($this->_gmailMessage)) {
+        if (!isset($this->_gmailMessage) or !is_object($this->_gmailMessage)) {
             $this->_gmailMessage = $this->createGmailMessage();
         }
 
