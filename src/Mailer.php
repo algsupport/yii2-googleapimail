@@ -42,6 +42,13 @@ class Mailer extends BaseMailer
         return new Gmail($this->getTransport());
     }
 
+    public function setTransport($transport)
+    {
+        if (!is_array($transport) && !is_object($transport)) {
+            throw new InvalidConfigException('"' . get_class($this) . '::transport" should be either object or array, "' . gettype($transport) . '" given.');
+        }
+        $this->_transport = $transport;
+    }
 	/**
 	 * @throws InvalidConfigException
 	 */
