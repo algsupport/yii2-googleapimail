@@ -26,7 +26,7 @@
         }
     ],
 	    "autoload": {
-        "psr-4": { "algsupport\\yii2-googleapimail\\": "src" }
+        "psr-4": { "algsupport\\googleapimail\\": "src" }
     },
 	"scripts": {
 		"pre-autoload-dump": "Google\\Task\\Composer::cleanup"
