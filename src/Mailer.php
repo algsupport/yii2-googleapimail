@@ -113,7 +113,7 @@ class Mailer extends BaseMailer
         }
         Yii::info('Sending email "' . $message->getSubject() . '" to "' . $address . '"', __METHOD__);
 
-		$googleMessage = new \Google\Service\Gmail\Message();
+		$googleMessage = Yii::createObject($messageClass);
 		$googleMessage->setRaw(strtr(base64_encode($message->toString()), array('+' => '-', '/' => '_')));
 
         return $this->getGmailMailer()->users_messages->send('me', $googleMessage) > 0;
