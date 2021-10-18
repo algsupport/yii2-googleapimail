@@ -54,7 +54,17 @@ class Message extends BaseMessage
 	 */
 	public function setFrom($from): Message
     {
-        $this->getGmailMessage()->setFrom($from);
+		if (is_array($from))
+	    {
+			foreach ($from as $mail => $name)
+			{
+				$this->getGmailMessage()->setFrom($mail, $name);
+			}
+	    }
+		else
+		{
+			$this->getGmailMessage()->setFrom(mail);
+		}
 
         return $this;
     }
@@ -69,9 +79,7 @@ class Message extends BaseMessage
 	 */
     public function setReplyTo($replyTo): Message
     {
-	    if (is_array($replyTo) && sizeof($replyTo) == 1) {
-		    $this->getGmailMessage()->addReplyTo($replyTo[0], $replyTo[1]);
-	    } elseif (is_array($replyTo) && sizeof($replyTo) > 1)
+		if (is_array($replyTo))
 	    {
 			foreach ($replyTo as $from => $name)
 			{
@@ -96,9 +104,7 @@ class Message extends BaseMessage
 	 */
     public function setTo($to): Message
     {
-		if (is_array($to) && sizeof($to) == 1) {
-		    $this->getGmailMessage()->addAddress($to[0], $to[1]);
-	    } elseif (is_array($to) && sizeof($to) > 1)
+		if (is_array($to))
 	    {
 			foreach ($to as $from => $name)
 			{
@@ -123,9 +129,7 @@ class Message extends BaseMessage
 	 */
     public function setCc($cc): Message
     {
-		if (is_array($cc) && sizeof($cc) == 1) {
-		    $this->getGmailMessage()->addCC($cc[0], $cc[1]);
-	    } elseif (is_array($cc) && sizeof($cc) > 1)
+		if (is_array($cc))
 	    {
 			foreach ($cc as $from => $name)
 			{
@@ -150,9 +154,7 @@ class Message extends BaseMessage
 	 */
     public function setBcc($bcc): Message
     {
-		if (is_array($bcc) && sizeof($bcc) == 1) {
-		    $this->getGmailMessage()->addBCC($bcc[0], $bcc[1]);
-	    } elseif (is_array($bcc) && sizeof($bcc) > 1)
+		if (is_array($bcc))
 	    {
 			foreach ($bcc as $from => $name)
 			{

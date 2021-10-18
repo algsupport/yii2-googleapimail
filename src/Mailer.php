@@ -27,7 +27,7 @@ class Mailer extends BaseMailer
 	 */
 	public function getGmailMailer(): Gmail
     {
-        if (!is_object($this->_gmailMailer)) {
+        if (!isset($this->_gmailMailer) or !is_object($this->_gmailMailer)) {
             $this->_gmailMailer = $this->createGmailMailer();
         }
 
@@ -42,7 +42,10 @@ class Mailer extends BaseMailer
         return new Gmail($this->getTransport());
     }
 
-    public function setTransport($transport)
+	/**
+	 * @throws InvalidConfigException
+	 */
+	public function setTransport($transport)
     {
         if (!is_array($transport) && !is_object($transport)) {
             throw new InvalidConfigException('"' . get_class($this) . '::transport" should be either object or array, "' . gettype($transport) . '" given.');
@@ -67,7 +70,7 @@ class Mailer extends BaseMailer
 	protected function createTransport(array $config)
     {
         if (!isset($config['class'])) {
-            $config['class'] = GmailApiTransport::class;
+            $config['class'] = Transport\GmailApiTransport::class;
         }
 	    return $this->createGmailObject($config)->client;
     }
@@ -120,7 +123,7 @@ class Mailer extends BaseMailer
         }
         Yii::info('Sending email "' . $message->getSubject() . '" to "' . $address . '"', __METHOD__);
 
-		$googleMessage = Yii::createObject($messageClass);
+		$googleMessage = Yii::createObject($this->messageClass);
 		$googleMessage->setRaw(strtr(base64_encode($message->toString()), array('+' => '-', '/' => '_')));
 
         return $this->getGmailMailer()->users_messages->send('me', $googleMessage) > 0;
