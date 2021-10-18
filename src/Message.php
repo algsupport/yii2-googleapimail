@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2021 ALGSUPPORT OÜ
  */
 
-namespace algsupport\googleapimail;
+namespace GoogleApiMail;
 
 use yii\mail\BaseMessage;
 use PHPMailer\PHPMailer\Exception;

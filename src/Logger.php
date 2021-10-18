@@ -4,7 +4,7 @@
  * @copyright Copyright (c) 2021 ALGSUPPORT OÜ
  */
 
-namespace algsupport\googleapimail;
+namespace GoogleApiMail;
 
 use Yii;
 
@@ -19,7 +19,7 @@ use Yii;
  * [
  *     'components' => [
  *         'mailer' => [
- *             'class' => 'algsupport\googleapimail\Mailer',
+ *             'class' => 'GoogleApiMail\Mailer',
  *             'enableSwiftMailerLogging' => true,
  *         ],
  *      ],
@@ -28,7 +28,7 @@ use Yii;
  * ```
  *
  *
- * In order to catch logs written by this class, you need to setup a log route for 'algsupport\googleapimail\Logger::add' category.
+ * In order to catch logs written by this class, you need to setup a log route for 'GoogleApiMail\Logger::add' category.
  * For example:
  *
  * ```php
@@ -38,7 +38,7 @@ use Yii;
  *             'targets' => [
  *                 [
  *                     'class' => 'yii\log\FileTarget',
- *                     'categories' => ['algsupport\googleapimail\Logger::add'],
+ *                     'categories' => ['GoogleApiMail\Logger::add'],
  *                 ],
  *             ],
  *         ],

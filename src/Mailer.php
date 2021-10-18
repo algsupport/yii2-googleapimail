@@ -5,7 +5,7 @@
  */
 
 
-namespace algsupport\googleapimail;
+namespace googleapimail;
 
 use Yii;
 use ReflectionObject;

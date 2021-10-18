@@ -1,6 +1,6 @@
 <?php
 
-	namespace algsupport\googleapimail;
+	namespace GoogleApiMail\Transport;
 
 	use google\Client;
 	use Google\Exception;
