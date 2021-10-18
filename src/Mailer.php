@@ -20,6 +20,7 @@ class Mailer extends BaseMailer
 
     private array $_transport = [];
 
+	public $messageClass = Message::class;
 
 	/**
 	 * @throws InvalidConfigException
