@@ -8,7 +8,7 @@
 
 	class GmailApiTransport
 	{
-		private string $google_api_credentials = "";
+		public string $google_api_credentials = "";
 
 		public Client $client;
 
