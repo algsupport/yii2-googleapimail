@@ -25,6 +25,9 @@
             "url": "https://asset-packagist.org"
         }
     ],
+	    "autoload": {
+        "psr-4": { "algsupport\\yii2-googleapimail\\": "src" }
+    },
 	"scripts": {
 		"pre-autoload-dump": "Google\\Task\\Composer::cleanup"
 	},
