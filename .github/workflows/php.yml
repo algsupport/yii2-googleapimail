@@ -8,16 +8,11 @@ on:
     branches: [ main ]
 
 jobs:
-  tagged-release:
-    name: "Tagged Release"
-    runs-on: "ubuntu-latest"
-
+  release-on-push:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Automatic Releases
-        run: |
-          echo "done!"
-      - uses: marvinpinto/action-automatic-releases@v1.2.1
+      - uses: rymndhng/release-on-push-action@master
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: false
+          bump_version_scheme: patch
