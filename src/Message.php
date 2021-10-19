@@ -26,6 +26,7 @@ class Message extends BaseMessage
     {
         if (!isset($this->_gmailMessage) or !is_object($this->_gmailMessage)) {
             $this->_gmailMessage = $this->createGmailMessage();
+			$this->_gmailMessage->isSMTP();
         }
 
         return $this->_gmailMessage;
@@ -63,7 +64,7 @@ class Message extends BaseMessage
 	    }
 		else
 		{
-			$this->getGmailMessage()->setFrom(mail);
+			$this->getGmailMessage()->setFrom($from);
 		}
 
         return $this;
@@ -106,9 +107,15 @@ class Message extends BaseMessage
     {
 		if (is_array($to))
 	    {
-			foreach ($to as $from => $name)
+			foreach ($to as $to_one)
 			{
-				$this->getGmailMessage()->addAddress($from, $name);
+				if (is_array($to_one)){
+					foreach ($to_one as $key => $value)
+					{
+						$this->getGmailMessage()->addAddress($key, $value);
+					}
+				}
+				else $this->getGmailMessage()->addAddress($to_one);
 			}
 	    }
 		else
@@ -194,7 +201,6 @@ class Message extends BaseMessage
     {
 		$this->getGmailMessage()->isHTML();
         $this->getGmailMessage()->Body = $html;
-
         return $this;
     }
 
@@ -221,15 +227,7 @@ class Message extends BaseMessage
 	 */
     public function attachContent($content, array $options = []): Message
     {
-		if (!empty($options['contentType'])) {
-            $contentType = $options['contentType'];
-        }
-		else{
-			$contentType = $this->getGmailMessage()::ENCODING_BASE64;
-		}
-		$name = $options['fileName'];
-		$this->getGmailMessage()->addStringAttachment($content, $name, $contentType);
-
+		$this->getGmailMessage()->addStringAttachment($content, $options['fileName']);
         return $this;
     }
 

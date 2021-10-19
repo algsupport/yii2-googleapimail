@@ -8,7 +8,6 @@
 namespace GoogleApiMail;
 
 use Yii;
-use ReflectionObject;
 use yii\mail\BaseMailer;
 use Google\Service\Gmail;
 use yii\base\InvalidConfigException;
@@ -16,9 +15,9 @@ use yii\base\InvalidConfigException;
 
 class Mailer extends BaseMailer
 {
-    private Gmail $_gmailMailer;
+    private ?Gmail $_gmailMailer;
 
-    private array $_transport = [];
+    private $_transport = [];
 
 	public $messageClass = Message::class;
 
@@ -51,11 +50,12 @@ class Mailer extends BaseMailer
             throw new InvalidConfigException('"' . get_class($this) . '::transport" should be either object or array, "' . gettype($transport) . '" given.');
         }
         $this->_transport = $transport;
+		$this->_gmailMailer = null;
     }
 	/**
 	 * @throws InvalidConfigException
 	 */
-	public function getTransport(): array
+	public function getTransport()
 	{
         if (!is_object($this->_transport)) {
             $this->_transport = $this->createTransport($this->_transport);
@@ -87,22 +87,11 @@ class Mailer extends BaseMailer
             throw new InvalidConfigException('Object configuration must be an array containing a "class" element.');
         }
 
-		$object = Yii::createObject($className);
-
-        if (!empty($config)) {
-            $reflection = new ReflectionObject($object);
-            foreach ($config as $name => $value) {
-                if ($reflection->hasProperty($name) && $reflection->getProperty($name)->isPublic()) {
-                    $object->$name = $value;
-                } else {
-                    $setter = 'set' . $name;
-                    if ($reflection->hasMethod($setter) || $reflection->hasMethod('__call')) {
-                        $object->$setter($value);
-                    } else {
-                        throw new InvalidConfigException('Setting unknown property: ' . $className . '::' . $name);
-                    }
-                }
-            }
+        if (isset($config['credentials'])) {
+            $object = Yii::createObject($className, [$config['credentials']]);
+            unset($config['credentials']);
+        } else {
+            throw new InvalidConfigException('Object configuration must be an array containing a "credentials" element.');
         }
 
         return $object;
@@ -112,8 +101,8 @@ class Mailer extends BaseMailer
 	/**
 	 * @throws InvalidConfigException
 	 */
-	protected function sendMessage($message): bool
-    {
+	protected function sendMessage($message): Gmail\Message
+	{
         $address = $message->getTo();
 
 		$this->getGmailMailer()->getClient()->setSubject($message->getFrom());
@@ -122,11 +111,9 @@ class Mailer extends BaseMailer
             $address = implode(', ', array_keys($address));
         }
         Yii::info('Sending email "' . $message->getSubject() . '" to "' . $address . '"', __METHOD__);
-
-		$googleMessage = Yii::createObject($this->messageClass);
+		$googleMessage = Yii::createObject(Gmail\Message::class);
 		$googleMessage->setRaw(strtr(base64_encode($message->toString()), array('+' => '-', '/' => '_')));
-
-        return $this->getGmailMailer()->users_messages->send('me', $googleMessage) > 0;
+        return $this->getGmailMailer()->users_messages->send('me', $googleMessage);
     }
 
 }
